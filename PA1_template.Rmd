@@ -8,15 +8,30 @@ output:
 
 ## Loading and preprocessing the data
 
-
+```{r loadData, echo=TRUE}
+library(dplyr)
+activity <-read.csv("activity.csv",header=TRUE)
+head(activity)
+act_tb<-tbl_df(activity)
+```
 
 ## What is mean total number of steps taken per day?
 
+```{r numberSteps}
 
+by_date<-group_by(act_tb,date ) %>%
+summarize(pasos=sum(steps))    
+hist(by_date$pasos,breaks=20, main="Histogram of steps taken per day", col="blue", xlab="Number of Steps")
+```
 
-## What is the average daily activity pattern?
+The average daily steps is `r format(mean(by_date$pasos,na.rm=TRUE))` and the median is `r format(median(by_date$pasos,na.rm=TRUE))`
 
+## What is the average daily activity pattern? activityPattern
+``` {r}
+by_interval<-group_by(act_tb,interval) %>% summarize(media=mean(steps,na.rm=TRUE))
 
+plot(by_interval$interval,by_interval$media,type='l')
+```
 
 ## Imputing missing values
 
