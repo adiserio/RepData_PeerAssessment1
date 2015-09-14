@@ -90,7 +90,7 @@ After replacing the missing values, the mean value remains the same and the medi
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r weekdays}
+```{r weekdays,fig.height=10,fig.width=10}
 require(lubridate)
 require(lattice)
 new_act$dia<-weekdays(as.Date(new_act$date))
