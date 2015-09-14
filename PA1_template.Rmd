@@ -8,6 +8,8 @@ output:
 
 ## Loading and preprocessing the data
 
+The dplyr package is used to manipulate the data
+
 ```{r loadData, echo=TRUE}
 require(dplyr)
 activity <-read.csv("activity.csv",header=TRUE)
@@ -17,15 +19,17 @@ head(act_tb)
 
 ## What is mean total number of steps taken per day?
 
-First the data is grouped by day, and then the average number of steps is computed for each day
+To compute the average number of steps taken per day, first the data is grouped by day, and then the mean value  for each day is calculated
 
 ```{r numberSteps}
 by_date<-group_by(act_tb,date ) %>%
-summarize(pasos=sum(steps))    
-hist(by_date$pasos,breaks=20, main="Histogram of steps taken per day", col="blue", xlab="Number of Steps")
+         summarize(pasos=sum(steps)) 
+
+hist(by_date$pasos,breaks=20, main="Histogram of steps taken per day", 
+     col="blue", xlab="Number of Steps")
 ```
 
-The average daily steps is `r format(mean(by_date$pasos,na.rm=TRUE))` and the median is `r format(median(by_date$pasos,na.rm=TRUE))`
+The average daily steps is `r format(mean(by_date$pasos,na.rm=TRUE))` and the median is `r formatC(median(by_date$pasos,na.rm=TRUE))`
 
 ## What is the average daily activity pattern? 
 For the activity pattern, the data is grouped by interval of time (HHMM) 
@@ -41,11 +45,46 @@ plot(by_interval$interval,by_interval$media,type='l',main="",xlab="Time of the d
 temp<-filter(by_interval,media==max(media))
 
 ```
-On average across all the days in the dataset, the interval that contains the maximum number of steps is `r temp$interval` with an average steps of `r format(temp$media)`
+On average across all the days in the dataset, the interval that contains the maximum number of steps is `r temp$interval` with an average steps of `r formatC(temp$media)`
 
 
 ## Imputing missing values
 
+The total number of missing values in the dataset is `r sum(is.na(activity$steps))`.
+
+To decide the strategy to follow for filling in all of the missing values in the dataset, the distribution of the missing data was analized. 
+
+```{r missingValues}
+temp <- group_by(act_tb,interval) %>%
+summarize(MV=sum(is.na(steps)))
+temp
+min(temp$MV) ; max(temp$MV)
+filter(by_date,is.na(pasos))
+
+```
+
+We noticed that the missing values are evenly distributed across the intervals and in particular they correspond to eight specific days.  For this reason, each missing value will be replaced with the mean steps value.
+
+```{r}
+new_act<-act_tb
+new_act$steps[is.na(new_act$steps)]<-mean(new_act$steps,na.rm=TRUE)
+head(new_act)
+```
+
+Using the new dataset with the NA values replaced, we compute the average number of steps taken per day
+
+```{r numberStepsNewData}
+
+by_date<-group_by(new_act,date ) %>%
+         summarize(pasos=sum(steps)) 
+
+hist(by_date$pasos,breaks=20, main="Histogram of steps taken per day", 
+     col="red", xlab="Number of Steps")
+```
+
+The average daily steps is `r format(mean(by_date$pasos,na.rm=TRUE))` and the median is `r format(median(by_date$pasos,na.rm=TRUE))`.
+
+After replacing the missing values, the mean value remains the same and the median changes. Now the mean and the median are equal.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
