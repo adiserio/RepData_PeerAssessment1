@@ -3,7 +3,7 @@
 
 ## Loading and preprocessing the data
 
-The dplyr package is used to manipulate the data
+The dplyr package is used to manipulate the data.
 
 
 ```r
@@ -44,7 +44,7 @@ head(act_tb)
 
 ## What is mean total number of steps taken per day?
 
-To compute the average number of steps taken per day, first the data is grouped by day, and then the mean value  for each day is calculated
+To compute the average number of steps taken per day, first the data is grouped by day, and then the mean value  for each day is calculated.
 
 
 ```r
@@ -57,7 +57,7 @@ hist(by_date$pasos,breaks=20, main="Histogram of steps taken per day",
 
 ![](PA1_template_files/figure-html/numberSteps-1.png) 
 
-The average daily steps is 10766.19 and the median is 10765
+The average daily steps is 10766.19 and the median is 10765.
 
 ## What is the average daily activity pattern? 
 For the activity pattern, the data is grouped by interval of time (HHMM) 
@@ -72,10 +72,11 @@ plot(by_interval$interval,by_interval$media,type='l',main="",xlab="Time of the d
 
 ![](PA1_template_files/figure-html/activityPattern-1.png) 
 
+
 ```r
 temp<-filter(by_interval,media==max(media))
 ```
-On average across all the days in the dataset, the interval that contains the maximum number of steps is 835 with an average steps of 206.2
+On average across all the days in the dataset, the interval that contains the maximum number of steps is 835 with an average steps of 206.2.
 
 
 ## Imputing missing values
@@ -138,7 +139,7 @@ filter(by_date,is.na(pasos))
 ## 8 2012-11-30    NA
 ```
 
-We noticed that the missing values are evenly distributed across the intervals and in particular they correspond to eight specific days.  For this reason, each missing value will be replaced with the mean steps value.
+The missing values are evenly distributed across the intervals and in particular they correspond to eight specific days.  For this reason, each missing value will be replaced with the mean steps value.
 
 
 ```r
@@ -159,7 +160,8 @@ head(new_act)
 ## 6 37.3826 2012-10-01       25
 ```
 
-Using the new dataset with the NA values replaced, we compute the average number of steps taken per day
+Using the new dataset with the NA values replaced, the average number of steps taken per day
+is computed.
 
 
 ```r
@@ -174,7 +176,47 @@ hist(by_date$pasos,breaks=20, main="Histogram of steps taken per day",
 
 The average daily steps is 10766.19 and the median is 10766.19.
 
-After replacing the missing values, the mean value remains the same and the median changes. Now the mean and the median are equal.
+After replacing the missing values, the mean value remains the same and the median changes. Now the mean and the median values are equal.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
+```r
+require(lubridate)
+```
+
+```
+## Loading required package: lubridate
+```
+
+```r
+require(lattice)
+```
+
+```
+## Loading required package: lattice
+```
+
+```r
+new_act$dia<-weekdays(as.Date(new_act$date))
+
+temp<-tbl_df(new_act)
+temp_weekdays<-filter(temp,dia!=c("Saturday","Sunday")) %>%
+               group_by(interval) %>% summarize(media=mean(steps,na.rm=TRUE)) %>%
+               mutate(tipo="Weekday")
+temp_weekends<-filter(temp,dia==c("Saturday","Sunday")) %>%
+               group_by(interval) %>% summarize(media=mean(steps,na.rm=TRUE)) %>%
+               mutate(tipo ="Weekend")
+final<-rbind(temp_weekends,temp_weekdays)
+
+xyplot(media~interval|tipo,data=final,type="l",layout=c(1,2),ylab="Number of Steps")
+```
+
+![](PA1_template_files/figure-html/weekdays-1.png) 
+
+
+Before 10am the subject seems to be more active during weekdays compared to weekends. After that time subject seems more active during the weekends.
+
+
+
